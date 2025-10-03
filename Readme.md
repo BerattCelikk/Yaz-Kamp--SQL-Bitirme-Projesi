@@ -1,5 +1,6 @@
 <div id="top">
 
+
 <!-- HEADER STYLE: CLASSIC -->
 <div align="center">
 
@@ -236,3 +237,4 @@ SELECT * FROM Siparis_Detay;
 
 
 ---
+![Veritabanı Diyagramı](SQL_BITIRME_PROJESI_FOTO.png)
