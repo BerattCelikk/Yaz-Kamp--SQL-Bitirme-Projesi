@@ -109,7 +109,7 @@ Projede ayrıca temel veri ekleme, güncelleme ve silme işlemleri ile ileri dü
 1. **Depoyu klonlayın:** 
 
 ```sh
-git clone <proje-linki>
+git clone https://github.com/BerattCelikk/Yaz-Kamp--SQL-Bitirme-Projesi
 ```
 
 2. **Proje dizinine gidin:**
