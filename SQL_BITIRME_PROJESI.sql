@@ -1,15 +1,15 @@
-CREATE DATABASE online_alýsveris;
+CREATE DATABASE online_alisveris;
 
-USE online_alýsveris;
+USE online_alisveris;
 
--- A. Veri Tabaný Tasarýmý
+-- A. Veri Tabani Tasarimi
 CREATE TABLE Musteri(
     id INT IDENTITY(1,1) PRIMARY KEY,
     ad NVARCHAR(50) NOT NULL,
     soyad NVARCHAR(50) NOT NULL,
     email NVARCHAR(50) UNIQUE NOT NULL,
     sehir NVARCHAR(50) NOT NULL,
-    kayit_tarihi DATE DEFAULT CAST(GETDATE() AS DATE)  -- düzeltildi
+    kayit_tarihi DATE DEFAULT CAST(GETDATE() AS DATE)  
 );
 
 CREATE TABLE Kategori(
@@ -37,7 +37,7 @@ CREATE TABLE Urun(
 CREATE TABLE Siparis(
     id INT IDENTITY(1,1) PRIMARY KEY,
     musteri_id INT NOT NULL,
-    tarih DATE DEFAULT CAST(GETDATE() AS DATE),  -- düzeltildi
+    tarih DATE DEFAULT CAST(GETDATE() AS DATE),  
     toplam_tutar NUMERIC(12,2) DEFAULT 0,
     odeme_turu NVARCHAR(50),
     FOREIGN KEY(musteri_id) REFERENCES Musteri(id)
@@ -53,13 +53,13 @@ CREATE TABLE Siparis_Detay(
     FOREIGN KEY (urun_id) REFERENCES Urun(id)
 );
 
--- Ýndeksler
+-- Indeksler
 CREATE INDEX idx_urun_kategori ON Urun(kategori_id);
 CREATE INDEX idx_urun_satici ON Urun(satici_id);
 CREATE INDEX idx_siparis_musteri ON Siparis(musteri_id);
 CREATE INDEX idx_siparisdetay_urun ON Siparis_Detay(urun_id);
 
---B: Veri Ekleme ve Güncelleme
+--B: Veri Ekleme ve GÃ¼ncelleme
 --Kategoriler
 INSERT INTO Kategori(ad) VALUES
 ('Elektronik'),
@@ -69,7 +69,7 @@ INSERT INTO Kategori(ad) VALUES
 
 --SATICILAR
 INSERT INTO Satici(ad,adres) VALUES
-('Berat ÇELÝK' , 'Istanbul,Halkali'),
+('Berat CELIK' , 'Istanbul,Halkali'),
 ('Siemens','Istanbul,Besiktas'),
 ('Ostim','Ankara,Batikent');
 
@@ -88,8 +88,8 @@ INSERT INTO Urun(ad,fiyat,stok,kategori_id,satici_id) VALUES
 INSERT INTO Musteri(ad,soyad,email,sehir,kayit_tarihi) VALUES
 ('Ahmet','Yilmaz','ahmet.y@example.com','Istanbul','2025-01-10'),
 ('Mehmet','Kara','mehmet.k@example.com','Ankara','2025-02-05'),
-('Ayþe','Demir','ayse.d@example.com','Izmir','2025-03-12'),
-('Fatma','Öztürk','fatma.o@example.com','Istanbul','2025-04-01'),
+('Ayse','Demir','ayse.d@example.com','Izmir','2025-03-12'),
+('Fatma','Ozturk','fatma.o@example.com','Istanbul','2025-04-01'),
 ('Can','Acar','can.a@example.com','Bursa','2025-04-15');
 
 --SIPARISLER
@@ -108,7 +108,7 @@ INSERT INTO Siparis_Detay (siparis_id,urun_id,adet,fiyat) VALUES
 (2, 5, 1, 89.90),     -- Mehmet kitap
 (3, 4, 1, 299.99),    -- Ahmet pantolon
 (3, 8, 3, 79.99),     -- Ahmet tshirt
-(4, 3, 1, 349.50),    -- Ayþe yorgan
+(4, 3, 1, 349.50),    -- Ayse yorgan
 (5, 7, 2, 149.99),    -- Fatma mutfak seti
 (6, 6, 1, 10999.00);  -- Can Smart TV
 
@@ -119,23 +119,23 @@ SET toplam_tutar = (
 	WHERE Siparis_Detay.siparis_id = siparis_id
 );
 
---MÜÞTERÝ ÞEHRÝ GÜNCELLEME
+--MUSTERÄ° ÅžEHRI GUNCELLEME
 UPDATE Musteri SET sehir = 'Istanbul' WHERE id = 2;
 
---ÜRÜN FÝYATINI %20 AZALT
+--ÃœRÃœN FIYATINI %20 AZALT
 UPDATE Urun SET fiyat = fiyat * 0.8 WHERE kategori_id = 3;
 
---TEK BÝR SÝPARÝÞ SÝL
---ÖNCE DETAYLARI SÝLMEMÝZ LAZIM ARA TABLO OLDUÐU ÝÇÝN
+--TEK BIR SIPARIS SIL
+--ONCE DETAYLARI SILMEMIZ LAZIM ARA TABLO OLDUGU ICIN
 DELETE FROM Siparis_Detay WHERE siparis_id = 2;
 DELETE FROM Siparis WHERE id = 2;
 
---TRUNCATE : TÜM SÝPARÝÞLERÝ TEMÝZLER.
+--TRUNCATE : TUM SIPARISLERI TEMIZLER.
 TRUNCATE TABLE Siparis_Detay;
 TRUNCATE TABLE Siparis;
 
---Sipariþ sonrasý stok düþürme
---ÖRNEÐÝN : siparis_id = 1 ' deki ürünler stoðu azalsýn.
+--Siparis sonrasi stok dusurme
+--ORNEGIN : siparis_id = 1 ' deki urunler stok azalsin.
 UPDATE u
 SET u.stok = u.stok-sd.adet
 FROM Urun u
@@ -145,34 +145,34 @@ WHERE sd.siparis_id = 1;
 
 --C. Veri Sorgulama ve Raporlama
 --Temel Sorgular:
---  - En çok sipariþ veren 5 müþteri.
---  - En çok satýlan ürünler.
---  - En yüksek cirosu olan satýcýlar.
+--  - En Ã§ok sipariÅŸ veren 5 mÃ¼ÅŸteri.
+--  - En Ã§ok satÄ±lan Ã¼rÃ¼nler.
+--  - En yÃ¼ksek cirosu olan satÄ±cÄ±lar.
 --Aggregate & Group By:
---  - Þehirlere göre müþteri sayýsý.
---  - Kategori bazlý toplam satýþlar.
---  - Aylara göre sipariþ sayýsý.
---JOIN’ler:
--- - Sipariþlerde müþteri bilgisi + ürün bilgisi + satýcý bilgisi.
--- - Hiç satýlmamýþ ürünler.
--- - Hiç sipariþ vermemiþ müþteriler.
+--  - Sehirlere gore musteri sayisi.
+--  - Kategori bazli toplam satislar.
+--  - Aylara gore siparis sayisi.
+--JOIN'ler:
+-- - Siparislerde musteri bilgisi + urun bilgisi + satici bilgisi.
+-- - HiÃ§ satÄ±lmamÄ±ÅŸ Ã¼rÃ¼nler.
+-- - HiÃ§ sipariÅŸ vermemiÅŸ mÃ¼ÅŸteriler.
 
 
---En çok sipariþ veren 5 müþteri
+--En Ã§ok sipariÅŸ veren 5 mÃ¼ÅŸteri
 SELECT TOP 5 m.id , m.ad , m.soyad , COUNT(s.id) AS siparis_sayisi
 FROM Musteri m
 JOIN Siparis s ON m.id = s.musteri_id
 GROUP BY m.id , m.ad , m.soyad
 ORDER BY siparis_sayisi DESC;
 
---  - En çok satýlan ürünler.
+--  - En Ã§ok satÄ±lan Ã¼rÃ¼nler.
 SELECT TOP 5 u.id , u.ad , SUM(sd.adet) AS toplam_satis
 FROM Urun u
 JOIN Siparis_Detay sd ON u.id = sd.urun_id
 GROUP BY u.id , u.ad
 ORDER BY toplam_satis DESC;
 
--- -En yüksek cirosu olan satýcýlar
+-- -En yÃ¼ksek cirosu olan satÄ±cÄ±lar
 SELECT TOP 5 sa.id , sa.ad , SUM(sd.adet *sd.fiyat) AS toplam_ciro
 FROM Satici sa
 JOIN Urun u ON sa.id = u.satici_id
@@ -181,13 +181,13 @@ GROUP BY sa.id , sa.ad
 ORDER BY toplam_ciro DESC;
 
 --Aggregate & Group By:
---  - Þehirlere göre müþteri sayýsý.
+--  - Sehirlere gore musteri sayisi.
 SELECT sehir , COUNT(*) AS musteri_sayisi
 FROM Musteri
 GROUP BY sehir
 ORDER BY musteri_sayisi DESC;
 
---  - Kategori bazlý toplam satýþlar.
+--  - Kategori bazli toplam satislar.
 SELECT k.id , k.ad AS kategori_adi , SUM(sd.adet * sd.fiyat) AS toplam_satis
 FROM Kategori k
 JOIN Urun u ON k.id = u.kategori_id
@@ -195,14 +195,14 @@ JOIN Siparis_Detay sd ON u.id = sd.urun_id
 GROUP BY k.id , k.ad
 ORDER BY toplam_satis DESC;
 
---  - Aylara göre sipariþ sayýsý.
+--  - Aylara gore siparis sayisi.
 SELECT YEAR(tarih) AS yil , MONTH(tarih) AS ay , COUNT(*) AS siparis_sayisi
 FROM Siparis
 GROUP BY YEAR(tarih) , MONTH(tarih)
 ORDER BY yil ,ay ;
 
---JOIN’ler:
--- - Sipariþlerde müþteri bilgisi + ürün bilgisi + satýcý bilgisi.
+--JOINler:
+-- - Siparislerde musteri bilgisi + urun bilgisi + satici bilgisi.
 SELECT s.id AS siparis_id, m.ad + ' ' + m.soyad AS musteri_adi, 
        u.ad AS urun_adi, sa.ad AS satici_adi, sd.adet, sd.fiyat
 FROM Siparis s
@@ -211,30 +211,30 @@ JOIN Siparis_Detay sd ON s.id = sd.siparis_id
 JOIN Urun u ON sd.urun_id = u.id
 JOIN Satici sa ON u.satici_id = sa.id;
 
--- - Hiç satýlmamýþ ürünler.
+-- - Hic satÄ±lmamÄ±ÅŸ Ã¼rÃ¼nler.
 SELECT u.id , u.ad
 FROM Urun u
 LEFT JOIN Siparis_Detay sd ON u.id = sd.urun_id
 WHERE sd.id IS NULL;
 
--- - Hiç sipariþ vermemiþ müþteriler.
+-- - HiÃ§ sipariÅŸ vermemiÅŸ mÃ¼ÅŸteriler.
 SELECT m.id , m.ad ,m.soyad
 FROM Musteri m
 LEFT JOIN Siparis s ON m.id = s.musteri_id
 WHERE s.id IS NULL;
 
 -------------------------------------------------
---D. Ýleri Seviye Görevler (Opsiyonel)
--- - En çok kazanç saðlayan ilk 3 kategori.
--- - Ortalama sipariþ tutarýný geçen sipariþleri bul.
--- - En az bir kez elektronik ürün satýn alan müþteriler.
+--D. Ileri Seviye GÃ¶revler (Opsiyonel)
+-- - En Ã§ok kazanan saÄŸlayan ilk 3 kategori.
+-- - Ortalama sipariÅŸ tutarÄ±nÄ± geÃ§en sipariÅŸleri bul.
+-- - En az bir kez elektronik Ã¼rÃ¼n satÄ±n alan mÃ¼ÅŸteriler.
 
--- - En çok kazanç saðlayan ilk 3 kategori.
+-- - En Ã§ok kazanan saÄŸlayan ilk 3 kategori.
 SELECT TOP 3 k.ad AS kategori_adi , SUM(sd.adet * sd.fiyat) AS toplam_ciro
 FROM Kategori k 
 JOIN Urun u ON k.id
 
--- - Ortalama sipariþ tutarýný geçen sipariþleri bul.
+-- - Ortalama siparis tutarini gecen siparisleri bul.
 WITH Ortalama AS (
     SELECT AVG(toplam_tutar) AS ort_tutar
     FROM Siparis
@@ -245,7 +245,7 @@ CROSS JOIN Ortalama o
 WHERE s.toplam_tutar > o.ort_tutar
 ORDER BY s.toplam_tutar DESC;
 
--- - En az bir kez elektronik ürün satýn alan müþteriler.
+-- - En az bir kez elektronik Ã¼rÃ¼n satÄ±n alan mÃ¼ÅŸteriler.
 SELECT DISTINCT m.id, m.ad, m.soyad, m.email
 FROM Musteri m
 JOIN Siparis s ON m.id = s.musteri_id
